@@ -9,7 +9,7 @@ export const userDataValidator = [
     .isAlpha('en-US').withMessage('Surname can contain only english language symbols')
     .isLength({ min: 2, max: 30 }).withMessage('Surname is too long or too short. Minimum 2, Maximum 30'),
   body('username', 'Pick a username').isString().withMessage('Username should be a string')
-    .isLength({ min: 2, max: 40 }).withMessage('Username is too long or too short. Minimum 6, Maximum 40')
+    .isLength({ min: 2, max: 30 }).withMessage('Username is too long or too short. Minimum 2, Maximum 30')
 ]
 
 export const userRegDataValidator = [

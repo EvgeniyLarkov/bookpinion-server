@@ -2,7 +2,6 @@ import { Router } from 'express'
 import ArticleController from '../../controllers/ArticleController'
 import { auth } from '../../middlewares'
 import { articleCreateValidator, articleQueryValidator } from '../../validators/validation'
-// import { articleCreateValidator } from '../../validators/validation'
 
 const router: Router = Router()
 

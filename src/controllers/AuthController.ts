@@ -4,13 +4,19 @@ import bcrypt from 'bcryptjs'
 import { validationResult } from 'express-validator'
 import UserModel from '../models/UserModel'
 import C from '../config'
+import { ErrorStatus, ServerErrorResponse, ServerSuccessResponse } from './types'
 
 class AuthController {
   async login (req: Request, res: Response): Promise<void> {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-      res.status(400).json({ status: 'error', message: errors.array() })
+      const response: ServerErrorResponse<ErrorStatus.valerr> = {
+        status: ErrorStatus.valerr,
+        errors: errors.array()
+      }
+
+      res.status(400).json(response)
       return
     }
 
@@ -28,6 +34,12 @@ class AuthController {
         throw new Error('Invalid data')
       }
 
+      const userData = {
+        username: user.username,
+        name: user.name,
+        surname: user.surname
+      }
+
       const payload: { username: string, isAdmin: boolean } = {
         username: user.username,
         isAdmin: user.isAdmin ?? false
@@ -39,14 +51,23 @@ class AuthController {
         { expiresIn: C.JWT_EXPIRATION },
         (error, token) => {
           if (error !== null) throw error
-          res.status(200).json({ status: 'success', message: 'Login successful', token })
+
+          const response: ServerSuccessResponse<typeof userData> = {
+            status: 'success',
+            message: userData,
+            token
+          }
+
+          res.status(200).json(response)
         }
       )
     } catch (error) {
-      res.status(400).json({
-        status: 'error',
-        message: error.toString()
-      })
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
     }
   }
 }

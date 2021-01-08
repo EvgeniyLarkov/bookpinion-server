@@ -1,3 +1,5 @@
+import { ErrorStatus } from "../../src/controllers/types"
+
 const { setupDB, app, request, populateDb, testData } = require('./test-setup')
 const Chance = require('chance')
 
@@ -30,7 +32,7 @@ describe('Test book get interface', () => {
   test('When requesting books out of range it should response with error and 400 status code', async (done) => {
     const response = await request(app).get('/?start=100&end=105')
 
-    expect(response.body.status).toContain('error')
+    expect(response.body.status).toContain(ErrorStatus.sererr)
     expect(response.statusCode).toBe(400)
     done()
   })
@@ -38,7 +40,7 @@ describe('Test book get interface', () => {
   test('When requesting books with invalid id it should response with error and 400 status code', async (done) => {
     const response = await request(app).get(`/${chance.guid()}`)
 
-    expect(response.body.status).toContain('error')
+    expect(response.body.status).toContain(ErrorStatus.sererr)
     expect(response.statusCode).toBe(400)
     done()
   })

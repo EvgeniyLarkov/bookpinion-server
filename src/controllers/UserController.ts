@@ -4,14 +4,20 @@ import UserModel, { UserInterface } from '../models/UserModel'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import C from '../config'
+import { ErrorStatus, ServerErrorResponse, ServerSuccessResponse } from './types'
 
 class UserController {
   async get (req: Request, res: Response): Promise<void> {
     const username = req.params.username
     const errors = validationResult(req)
 
-    if (typeof username !== 'string' || !errors.isEmpty()) {
-      res.status(400).json({ status: 'error', message: 'invalid data' })
+    if (!errors.isEmpty()) {
+      const response: ServerErrorResponse<ErrorStatus.valerr> = {
+        status: ErrorStatus.valerr,
+        errors: errors.array()
+      }
+
+      res.status(400).json(response)
       return
     }
 
@@ -19,13 +25,22 @@ class UserController {
       const user = await UserModel.findOne({ username }).select(' -__v -_id -password')
 
       if (user === null) {
-        res.status(404).json({ status: 'error', message: 'user not found' })
-        return
+        throw new Error('User not found')
       }
 
-      res.status(200).json({ status: 'success', message: user })
+      const response: ServerSuccessResponse<typeof user> = {
+        status: 'success',
+        message: user
+      }
+
+      res.status(200).json(response)
     } catch (error) {
-      res.status(400).json({ status: 'error', message: error })
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
     }
   }
 
@@ -41,15 +56,19 @@ class UserController {
       const errors = validationResult(req)
 
       if (!errors.isEmpty()) {
-        res.status(400).json({ status: 'validation error', message: errors.array() })
+        const response: ServerErrorResponse<ErrorStatus.valerr> = {
+          status: ErrorStatus.valerr,
+          errors: errors.array()
+        }
+
+        res.status(400).json(response)
         return
       }
 
       const existingUser = await UserModel.findOne({ username: requestData.username })
 
       if (existingUser !== null) {
-        res.status(400).json({ status: 'error', message: 'user exist' })
-        return
+        throw new Error('User exists')
       }
 
       const salt = await bcrypt.genSalt(10)
@@ -67,7 +86,12 @@ class UserController {
 
       const payload = {
         username: userData.username,
-        isAdmin: false
+        isAdmin: userData.isAdmin
+      }
+
+      const userResponseData = {
+        ...userData,
+        password: ''
       }
 
       jwt.sign(
@@ -76,14 +100,22 @@ class UserController {
         { expiresIn: C.JWT_EXPIRATION },
         (err, token) => {
           if (err !== null) throw err
-          res.status(201).json({ status: 'successful', token, message: payload })
-        }
-      )
+
+          const response: ServerSuccessResponse<typeof userResponseData> = {
+            status: 'success',
+            message: userResponseData,
+            token
+          }
+
+          res.status(201).json(response)
+        })
     } catch (error) {
-      res.status(400).json({
-        status: 'error',
-        message: error.toString()
-      })
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
     }
   }
 }

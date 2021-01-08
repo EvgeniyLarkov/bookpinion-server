@@ -42,7 +42,7 @@ const app = express()
 app.use(express.json())
 
 app.post('/article', articleCreateValidator, ArticleController.create)
-app.get('/article', articleQueryValidator, ArticleController.get)
+app.get('/article', articleQueryValidator, ArticleController.index)
 
 const testData: ArticleInterface[] = Array.from({ length: 20 }, () => ({
   username: chance.word(),

@@ -2,6 +2,7 @@ import { Response, Request } from 'express'
 import { validationResult } from 'express-validator'
 import fetchBooks, { RawBookDataInterface } from '../core/fetch'
 import BookModel, { ExtendedBookInterface } from '../models/BookModel'
+import { ErrorStatus, ServerErrorResponse, ServerSuccessResponse } from './types'
 
 class BookController {
   async byId (req: Request, res: Response): Promise<void> {
@@ -9,8 +10,13 @@ class BookController {
       const errors = validationResult(req)
       const id = req.params.id
 
-      if (typeof id !== 'string' || !errors.isEmpty()) {
-        res.status(400).json({ status: 'error', message: errors ?? 'invalid data' })
+      if (!errors.isEmpty()) {
+        const response: ServerErrorResponse<ErrorStatus.valerr> = {
+          status: ErrorStatus.valerr,
+          errors: errors.array()
+        }
+
+        res.status(400).json(response)
         return
       }
 
@@ -20,9 +26,19 @@ class BookController {
         throw new Error('Book not found')
       }
 
-      res.status(200).json({ status: 'success', message: book })
+      const response: ServerSuccessResponse<typeof book> = {
+        status: 'success',
+        message: book
+      }
+
+      res.status(200).json(response)
     } catch (error) {
-      res.status(400).json({ status: 'error', message: error.toString() })
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
     }
   }
 
@@ -31,7 +47,12 @@ class BookController {
       const errors = validationResult(req)
 
       if (!errors.isEmpty()) {
-        res.status(400).json({ status: 'validation error', message: errors })
+        const response: ServerErrorResponse<ErrorStatus.valerr> = {
+          status: ErrorStatus.valerr,
+          errors: errors.array()
+        }
+
+        res.status(400).json(response)
         return
       }
 
@@ -52,9 +73,19 @@ class BookController {
         throw new Error('Books not found')
       }
 
-      res.status(200).json({ status: 'success', message: result })
+      const response: ServerSuccessResponse<typeof result> = {
+        status: 'success',
+        message: result
+      }
+
+      res.status(200).json(response)
     } catch (error) {
-      res.status(400).json({ status: 'error', message: error.toString() })
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
     }
   }
 
@@ -76,9 +107,19 @@ class BookController {
 
       const books = await BookModel.insertMany(parsedData, { ordered: false })
 
-      res.status(200).json({ status: 'success', message: books })
+      const response: ServerSuccessResponse<typeof books> = {
+        status: 'success',
+        message: books
+      }
+
+      res.status(200).json(response)
     } catch (error) {
-      res.status(400).json({ status: 'error', message: error })
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
     }
   }
 }

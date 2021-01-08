@@ -1,4 +1,5 @@
 import app from '../src/app'
+import { ErrorStatus } from '../src/controllers/types'
 import { UserInterface } from '../src/models/UserModel'
 const request = require('supertest')
 const { setupDB } = require('./test-setup')
@@ -48,7 +49,7 @@ describe('Test the user registration interface', () => {
 
     const response2 = await request(app).post('/api/auth').send({ ...invalidData, token })
 
-    expect(response2.body.status).toContain('error')
+    expect(response2.body.status).toContain(ErrorStatus.sererr)
     expect(response2.body.token).toBeUndefined()
     expect(response2.statusCode).toBe(400)
   })

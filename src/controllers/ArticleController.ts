@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { validationResult } from 'express-validator'
 import ArticleModel, { ArticleInterface } from '../models/ArticleModel'
+import { ErrorStatus, ServerErrorResponse, ServerSuccessResponse } from './types'
 
 class Article {
   async byId (req: Request, res: Response): Promise<void> {
@@ -8,8 +9,13 @@ class Article {
       const errors = validationResult(req)
       const id = req.params.id
 
-      if (typeof id !== 'string' || !errors.isEmpty()) {
-        res.status(400).json({ status: 'error', message: errors ?? 'invalid data' })
+      if (!errors.isEmpty()) {
+        const response: ServerErrorResponse<ErrorStatus.valerr> = {
+          status: ErrorStatus.valerr,
+          errors: errors.array()
+        }
+
+        res.status(400).json(response)
         return
       }
 
@@ -19,9 +25,19 @@ class Article {
         throw new Error('Article not found')
       }
 
-      res.status(200).json({ status: 'success', message: article })
+      const response: ServerSuccessResponse<typeof article> = {
+        status: 'success',
+        message: article
+      }
+
+      res.status(200).json(response)
     } catch (error) {
-      res.status(400).json({ status: 'error', message: error.toString() })
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
     }
   }
 
@@ -29,7 +45,13 @@ class Article {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-      res.status(400).json({ status: 'error', message: errors })
+      const response: ServerErrorResponse<ErrorStatus.valerr> = {
+        status: ErrorStatus.valerr,
+        errors: errors.array()
+      }
+
+      res.status(400).json(response)
+      return
     }
 
     try {
@@ -53,9 +75,19 @@ class Article {
 
       const slicedArticles = articles.slice(start, end)
 
-      res.status(200).json({ status: 'success', message: slicedArticles })
+      const response: ServerSuccessResponse<typeof slicedArticles> = {
+        status: 'success',
+        message: slicedArticles
+      }
+
+      res.status(200).json(response)
     } catch (error) {
-      res.status(400).json({ status: 'error', message: error })
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
     }
   }
 
@@ -63,7 +95,12 @@ class Article {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-      res.status(400).json({ status: 'error', message: errors.array() })
+      const response: ServerErrorResponse<ErrorStatus.valerr> = {
+        status: ErrorStatus.valerr,
+        errors: errors.array()
+      }
+
+      res.status(400).json(response)
       return
     }
 
@@ -81,10 +118,20 @@ class Article {
       const article = await ArticleModel.create({ ...reqData })
 
       await article.save()
-      res.status(201).json({ status: 'success', message: 'article added' })
-    } catch (err) {
-      console.log(err)
-      res.status(400).json({ status: 'error', message: err })
+
+      const response: ServerSuccessResponse<string> = {
+        status: 'success',
+        message: 'article added'
+      }
+
+      res.status(201).json(response)
+    } catch (error) {
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
     }
   }
 }

@@ -42,7 +42,7 @@ app.use(express.json())
 
 app.post('/', [], BookController.populate)
 app.get('/', bookQueryValidator, BookController.index)
-app.get('/:id', bookParamValidator, BookController.getOne)
+app.get('/:id', bookParamValidator, BookController.byId)
 
 const testData: ExtendedBookInterface[] = Array.from({ length: 20 }, () => ({
   id: chance.fbid(),

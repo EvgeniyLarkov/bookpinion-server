@@ -1,7 +1,11 @@
 import express from 'express'
 import { article, auth, user, book } from './routes/api'
 
+const cors = require('cors')
 const app = express()
+
+app.use(cors())
+app.options('*', cors())
 
 app.use(express.json())
 app.set('query parser', 'simple')

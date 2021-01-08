@@ -40,13 +40,13 @@ const app = express()
 
 app.use(express.json())
 
-app.post('/user', userRegDataValidator, UserController.create)
-app.get('/user', userGetValidator, UserController.get)
+app.post('/', userRegDataValidator, UserController.create)
+app.get('/:username', userGetValidator, UserController.get)
 
 const testData: UserInterface[] = Array.from({ length: 20 }, () => ({
   name: chance.first({ nationality: 'en' }),
   surname: chance.last({ nationality: 'en' }),
-  username: chance.word(),
+  username: chance.word({ length: 8 }),
   password: chance.word({ length: 8 })
 }))
 
@@ -66,7 +66,7 @@ module.exports = {
   },
   populateDb () {
     beforeAll(async () => {
-      const data = testData.map(item => request(app).post('/user').send(item))
+      const data = testData.map(item => request(app).post('/').send(item))
 
       return Promise.all(data)
     })

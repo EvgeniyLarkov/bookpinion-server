@@ -122,6 +122,30 @@ class BookController {
       res.status(400).json(response)
     }
   }
+
+  async preview (_: Request, res: Response): Promise<void> {
+    try {
+      const books = await BookModel.find({}).select('_id authors title')
+
+      if (books.length === 0) {
+        throw new Error('Books not found')
+      }
+
+      const response: ServerSuccessResponse<typeof books> = {
+        status: 'success',
+        message: books
+      }
+
+      res.status(200).json(response)
+    } catch (error) {
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
+    }
+  }
 }
 
 export default new BookController()

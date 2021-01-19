@@ -1,6 +1,6 @@
 export enum ErrorStatus {
   connerr = 'connection error',
-  sererr = 'server errror',
+  sererr = 'server error',
   valerr = 'validation error',
 }
 

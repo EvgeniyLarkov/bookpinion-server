@@ -8,6 +8,7 @@ export interface UserInterface {
   password: string
   username: string
   isAdmin?: boolean
+  location?: string
   regDate?: { type: Date }
 }
 
@@ -35,6 +36,19 @@ const UserSchema = new Schema({
   },
   location: String,
   regDate: { type: Date, default: Date.now }
+})
+
+UserSchema.set('toJSON', {
+  transform: (_: unknown, response: mongoose.Document) => {
+    const { _id, ...data } = response
+    if (_id === null) {
+      return response
+    }
+    return {
+      ...data,
+      id: _id
+    }
+  }
 })
 
 const UserModel = model<UserInterface & mongoose.Document>('User', UserSchema)

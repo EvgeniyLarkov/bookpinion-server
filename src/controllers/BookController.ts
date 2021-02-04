@@ -125,7 +125,7 @@ class BookController {
 
   async preview (_: Request, res: Response): Promise<void> {
     try {
-      const books = await BookModel.find({}).select('_id authors title')
+      const books = await BookModel.find({}).select('id authors title -_id')
 
       if (books.length === 0) {
         throw new Error('Books not found')

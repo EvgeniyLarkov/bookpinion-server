@@ -5,7 +5,7 @@ const { Schema } = mongoose
 export interface ArticleInterface {
   username: string
   title: string
-  author: string
+  authors: string[]
   bookId: string
   article: string
   rating: number
@@ -29,8 +29,8 @@ const ArticleSchema = new Schema({
     type: String,
     required: true
   },
-  author: {
-    type: String,
+  authors: {
+    type: Array,
     required: true
   },
   bookId: {
@@ -38,6 +38,19 @@ const ArticleSchema = new Schema({
     required: true
   },
   createdAt: { type: Date, default: Date.now }
+})
+
+ArticleSchema.set('toJSON', {
+  transform: (_: unknown, response: mongoose.Document) => {
+    const { _id, ...data } = response
+    if (_id === null) {
+      return response
+    }
+    return {
+      ...data,
+      id: _id
+    }
+  }
 })
 
 const ArticleModel = model<ArticleInterface & mongoose.Document>('Article', ArticleSchema)

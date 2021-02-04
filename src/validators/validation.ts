@@ -1,6 +1,10 @@
 import { body, query, param } from 'express-validator'
 import C from '../config/constants'
 
+// TO-DO
+// Добавить константы вместо магических цифр
+// Убрать дублирование
+
 export const userDataValidator = [
   body('name', 'Enter first name').isString().withMessage('Invalid name')
     .isAlpha('en-US').withMessage('Name can contain only english language symbols')
@@ -21,10 +25,6 @@ export const userRegDataValidator = [
 export const articleCreateValidator = [
   body('username', 'Pick a username').isString().withMessage('Username should be a string')
     .isLength({ min: 2, max: 40 }).withMessage('Username is too long or too short. Minimum 6, Maximum 40'),
-  body('title', 'Choose book').isString().withMessage('Not a book name')
-    .isLength({ min: 1, max: 40 }).withMessage('Bookname is too long or too short. Minimum 1, Maximum 40'),
-  body('author', 'Author of the book').isString().withMessage('Not an author name')
-    .isLength({ min: 2, max: 40 }).withMessage('Author name is too long or too short. Minimum 2, Maximum 40'),
   body('bookId', 'Book id').isString().withMessage('Invalid book id')
     .isLength({ min: 2, max: 40 }).withMessage('Book id is too long or too short. Minimum 2, Maximum 40'),
   body('article', 'Text content of the article').isString().withMessage('Invalid symbols')
@@ -35,9 +35,9 @@ export const articleCreateValidator = [
 ]
 
 export const articleQueryValidator = [
-  query('author', 'Author of the book').optional().isString().withMessage('Not an author name')
-    .isLength({ min: C.MIN_AUTHOR_CHARS, max: C.MAX_AUTHOR_CHARS })
-    .withMessage(`Author name is too long or too short. Minimum ${C.MIN_AUTHOR_CHARS}, Maximum ${C.MAX_AUTHOR_CHARS}`),
+  query('authors', 'Authors of the book').optional().isArray().withMessage('Not an authors name'),
+  // .isLength({ min: C.MIN_AUTHOR_CHARS, max: C.MAX_AUTHOR_CHARS })
+  // .withMessage(`Author name is too long or too short. Minimum ${C.MIN_AUTHOR_CHARS}, Maximum ${C.MAX_AUTHOR_CHARS}`),
   query('start').optional().isNumeric().withMessage('Not a number')
     .isFloat({ min: C.MIN_QUERYARTICLE_LIMIT, max: C.MAX_QUERYARTICLE_LIMIT }).withMessage('Value should be positive and less than 1000'),
   query('end').optional().isNumeric().withMessage('Not a number')

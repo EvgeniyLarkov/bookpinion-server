@@ -3,6 +3,10 @@ import { validationResult } from 'express-validator'
 import ArticleModel from '../models/ArticleModel'
 import { ErrorStatus, ServerErrorResponse, ServerSuccessResponse } from './types'
 import BookModel from '../models/BookModel'
+import { isArrayOfStrings } from '../middlewares/withFilter'
+
+// TO-DO
+// Исправить $or в методе index, добавить ошибку при невалидной категории
 
 class Article {
   async byId (req: Request, res: Response): Promise<void> {
@@ -58,25 +62,32 @@ class Article {
     try {
       const data = {
         bookId: req.query.bookId ?? null,
-        username: req.query.username ?? null,
-        title: req.query.title ?? null,
-        author: req.query.author ?? null
+        username: req.query.username ?? null
       }
+
       const start: number = (req.query.start !== undefined) ? +req.query.start : 0
       const end: number = (req.query.end !== undefined) ? +req.query.end : start + 10
 
-      const parsedData = Object.entries(data).reduce((acc, val) => (val[1] === null) ? acc : { ...acc, [val[0]]: val[1] }, {})
+      const searchData = Object.entries(data).reduce((acc, val) => {
+        if (val[1] === null) return acc
+        if (isArrayOfStrings(val[1])) return { ...acc, $or: val[1].map((item) => ({ [val[0]]: item })) }
+        return { ...acc, [val[0]]: val[1] }
+      }, {})
 
-      const articles = await ArticleModel.find({ ...parsedData }).select('-__v').skip(start).limit(end - start)
+      const articles = await ArticleModel.find({ ...searchData }).select('-__v')
 
-      if (articles.length === 0) {
-        res.status(200).json({ status: 'error', message: 'articles not found' })
-        return
+      const result = articles.slice(start, end)
+
+      if (result.length === 0) {
+        throw new Error('No articles found')
       }
 
-      const response: ServerSuccessResponse<typeof articles> = {
+      const response: ServerSuccessResponse<{ data: typeof result, totalArticles: number }> = {
         status: 'success',
-        message: articles
+        message: {
+          data: result,
+          totalArticles: articles.length
+        }
       }
 
       res.status(200).json(response)
@@ -118,13 +129,13 @@ class Article {
         throw new Error(`Book with id: ${reqData.bookId as string} not found`)
       }
 
-      const article = await ArticleModel.create({ ...reqData, authors: book.authors, title: book.title })
+      const article = await ArticleModel.create(reqData)
 
       await article.save()
 
-      const response: ServerSuccessResponse<string> = {
+      const response: ServerSuccessResponse<typeof article> = {
         status: 'success',
-        message: 'article added'
+        message: article
       }
 
       res.status(201).json(response)

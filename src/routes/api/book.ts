@@ -11,6 +11,4 @@ router.get('/:id', bookParamValidator, BookController.byId)
 
 router.get('/', bookQueryValidator, BookController.index)
 
-router.get('/api/preview', [], BookController.preview)
-
 export default router

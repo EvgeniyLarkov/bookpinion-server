@@ -2,6 +2,7 @@ export enum ErrorStatus {
   connerr = 'connection error',
   sererr = 'server error',
   valerr = 'validation error',
+  autherr = 'authorization error'
 }
 
 export interface ValidationError {

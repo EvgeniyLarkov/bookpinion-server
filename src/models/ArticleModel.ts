@@ -4,8 +4,6 @@ const { Schema } = mongoose
 
 export interface ArticleInterface {
   username: string
-  title: string
-  authors: string[]
   bookId: string
   article: string
   rating: number
@@ -17,20 +15,12 @@ const ArticleSchema = new Schema({
     type: String,
     required: true
   },
-  title: {
-    type: String,
-    required: true
-  },
   article: {
     type: String,
     required: true
   },
   rating: {
     type: String,
-    required: true
-  },
-  authors: {
-    type: Array,
     required: true
   },
   bookId: {

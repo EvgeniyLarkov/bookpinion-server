@@ -1,6 +1,7 @@
 import C from '../config'
 import { Response, Request, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
+import { ErrorStatus } from '../controllers/types'
 
 export default function (req: Request, res: Response, next: NextFunction): void {
   try {
@@ -27,6 +28,6 @@ export default function (req: Request, res: Response, next: NextFunction): void 
   } catch (error) {
     res
       .status(401)
-      .json({ status: 'authorization error', message: error.toString() })
+      .json({ status: ErrorStatus.autherr, message: error.toString() })
   }
 }

@@ -9,6 +9,7 @@ export interface BookInterface {
 
 export interface ExtendedBookInterface extends BookInterface {
   authors: string[]
+  category?: string[]
   id: string
   title: string
   description: string
@@ -20,6 +21,9 @@ const BookSchema = new Schema({
   authors: {
     type: Array,
     required: true
+  },
+  category: {
+    type: Array
   },
   id: {
     type: String,

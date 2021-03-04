@@ -26,9 +26,12 @@ class BookController {
         throw new Error('Book not found')
       }
 
-      const response: ServerSuccessResponse<typeof book> = {
+      const response: ServerSuccessResponse<{data: Array<typeof book>, totalBooks: number}> = {
         status: 'success',
-        message: book
+        message: {
+          data: [book],
+          totalBooks: 1
+        }
       }
 
       res.status(200).json(response)
@@ -58,7 +61,8 @@ class BookController {
 
       const data = {
         authors: req.query.authors ?? null,
-        title: req.query.title ?? null
+        title: req.query.title ?? null,
+        category: req.query.category ?? null
       }
       const start: number = (req.query.start !== undefined) ? +req.query.start : 0
       const end: number = (req.query.end !== undefined) ? +req.query.end : 10
@@ -73,9 +77,12 @@ class BookController {
         throw new Error('Books not found')
       }
 
-      const response: ServerSuccessResponse<typeof result> = {
+      const response: ServerSuccessResponse<{ data: typeof result, totalBooks: number }> = {
         status: 'success',
-        message: result
+        message: {
+          data: result,
+          totalBooks: books.length
+        }
       }
 
       res.status(200).json(response)
@@ -106,30 +113,6 @@ class BookController {
       }))
 
       const books = await BookModel.insertMany(parsedData, { ordered: false })
-
-      const response: ServerSuccessResponse<typeof books> = {
-        status: 'success',
-        message: books
-      }
-
-      res.status(200).json(response)
-    } catch (error) {
-      const response: ServerErrorResponse<ErrorStatus.sererr> = {
-        status: ErrorStatus.sererr,
-        errors: { msg: error.toString() }
-      }
-
-      res.status(400).json(response)
-    }
-  }
-
-  async preview (_: Request, res: Response): Promise<void> {
-    try {
-      const books = await BookModel.find({}).select('id authors title -_id')
-
-      if (books.length === 0) {
-        throw new Error('Books not found')
-      }
 
       const response: ServerSuccessResponse<typeof books> = {
         status: 'success',

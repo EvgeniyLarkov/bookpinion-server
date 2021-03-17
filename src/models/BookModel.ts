@@ -13,7 +13,7 @@ export interface ExtendedBookInterface extends BookInterface {
   id: string
   title: string
   description: string
-  imageLinks: { small: string, normal: string }
+  imageLinks: { small: string, normal: string, big?: string }
   link: string
 }
 
@@ -46,6 +46,9 @@ const BookSchema = new Schema({
     normal: {
       type: String,
       required: true
+    },
+    big: {
+      type: String
     }
   },
   link: {

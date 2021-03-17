@@ -1,9 +1,18 @@
 import { Response, Request, NextFunction } from 'express'
 import { ErrorStatus } from '../controllers/types'
+import UserModel from '../models/UserModel'
 
-export default function (req: Request, res: Response, next: NextFunction): void {
+export default async function (req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const adminStatus: boolean | undefined = req.body.isAdmin
+    const username = req.body.username
+
+    const user = await UserModel.findOne({ username }).select('isAdmin')
+
+    if (user === null) {
+      throw new Error('User not found')
+    }
+
+    const adminStatus = user.isAdmin
 
     if (adminStatus === undefined || !adminStatus) {
       throw new Error('Permission denied')

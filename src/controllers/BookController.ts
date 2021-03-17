@@ -1,6 +1,7 @@
 import { Response, Request } from 'express'
 import { validationResult } from 'express-validator'
 import fetchBooks, { RawBookDataInterface } from '../core/fetch'
+import { isArrayOfStrings } from '../middlewares/withFilter'
 import BookModel, { ExtendedBookInterface } from '../models/BookModel'
 import { ErrorStatus, ServerErrorResponse, ServerSuccessResponse } from './types'
 
@@ -60,14 +61,20 @@ class BookController {
       }
 
       const data = {
+        id: req.query.id ?? null,
         authors: req.query.authors ?? null,
         title: req.query.title ?? null,
         category: req.query.category ?? null
       }
+
       const start: number = (req.query.start !== undefined) ? +req.query.start : 0
       const end: number = (req.query.end !== undefined) ? +req.query.end : 10
 
-      const parsedData = Object.entries(data).reduce((acc, val) => (val[1] === null) ? acc : { ...acc, [val[0]]: val[1] }, {})
+      const parsedData = Object.entries(data).reduce((acc: { [x: string]: typeof data.id | Array<{[x: string]: typeof data.id}> }, val) => {
+        if (val[1] === null) return acc
+        if (isArrayOfStrings(val[1])) return { ...acc, $or: [...val[1].map((item) => ({ [val[0]]: item }))] }
+        return { ...acc, [val[0]]: val[1] }
+      }, {})
 
       const books = await BookModel.find(parsedData).select('-__v -_id')
 
@@ -117,6 +124,29 @@ class BookController {
       const response: ServerSuccessResponse<typeof books> = {
         status: 'success',
         message: books
+      }
+
+      res.status(200).json(response)
+    } catch (error) {
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
+    }
+  }
+
+  async update (req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id
+      const data: ExtendedBookInterface = req.body
+      console.log(data)
+      const result = await BookModel.update({ id }, data)
+
+      const response: ServerSuccessResponse<typeof result> = {
+        status: 'success',
+        message: result
       }
 
       res.status(200).json(response)

@@ -5,25 +5,26 @@ import { ErrorStatus } from '../controllers/types'
 
 export default function (req: Request, res: Response, next: NextFunction): void {
   try {
-    const token: string | undefined = req.body.token
+    const tokenData = req.headers.authorization
 
-    if (token === undefined) {
+    if (tokenData === undefined) {
       throw new Error('No token, authorization denied')
     }
 
+    const token = tokenData.replace('Bearer ', '')
+
     jwt.verify(token, C.JWT_SECRET)
 
-    const tokenData = jwt.decode(token)
+    const decodedData = jwt.decode(token)
 
-    if (typeof tokenData !== 'object' || tokenData === null) {
+    if (typeof decodedData !== 'object' || decodedData === null) {
       throw new Error('Token is not valid')
     }
 
-    const username = tokenData.username
-    const isAdmin = tokenData.isAdmin
+    const username = decodedData.username
 
     req.body.username = username
-    req.body.isAdmin = isAdmin
+
     next()
   } catch (error) {
     res

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { validationResult } from 'express-validator'
-import ArticleModel from '../models/ArticleModel'
+import ArticleModel, { ArticleInterface } from '../models/ArticleModel'
 import { ErrorStatus, ServerErrorResponse, ServerSuccessResponse } from './types'
 import BookModel from '../models/BookModel'
 import { isArrayOfStrings } from '../middlewares/withFilter'
@@ -139,6 +139,29 @@ class Article {
       }
 
       res.status(201).json(response)
+    } catch (error) {
+      const response: ServerErrorResponse<ErrorStatus.sererr> = {
+        status: ErrorStatus.sererr,
+        errors: { msg: error.toString() }
+      }
+
+      res.status(400).json(response)
+    }
+  }
+
+  async update (req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id
+      const data: ArticleInterface = req.body
+
+      const result = ArticleModel.update({ id }, data)
+
+      const response: ServerSuccessResponse<typeof result> = {
+        status: 'success',
+        message: result
+      }
+
+      res.status(200).json(response)
     } catch (error) {
       const response: ServerErrorResponse<ErrorStatus.sererr> = {
         status: ErrorStatus.sererr,

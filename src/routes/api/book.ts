@@ -6,6 +6,7 @@ import { bookParamValidator, bookQueryValidator } from '../../validators/validat
 const router: Router = Router()
 
 router.post('/update', [auth, admin], BookController.populate)
+router.put('/update/:id', [auth, admin], BookController.update)
 
 router.get('/:id', bookParamValidator, BookController.byId)
 

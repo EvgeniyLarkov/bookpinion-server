@@ -37,12 +37,12 @@ class AuthController {
       const userData = {
         username: user.username,
         name: user.name,
-        surname: user.surname
+        surname: user.surname,
+        isAdmin: user.isAdmin ?? false
       }
 
-      const payload: { username: string, isAdmin: boolean } = {
-        username: user.username,
-        isAdmin: user.isAdmin ?? false
+      const payload: { username: string } = {
+        username: user.username
       }
 
       jwt.sign(

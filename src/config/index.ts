@@ -12,7 +12,7 @@ export default {
   DB_PORT: process.env.DB_PORT ?? '27017',
   DB_USER: process.env.DB_USER ?? 'root',
 
-  JWT_ENCRYPTION: process.env.JWT_ENCRYPTION ?? 'jwt_please_change',
+  JWT_ENCRYPTION: process.env.JWT_ENCRYPTION ?? 'HS256',
   JWT_EXPIRATION: process.env.JWT_EXPIRATION ?? '1h',
   JWT_SECRET: process.env.JWT_SECRET ?? 'SECRET-KEY-997',
   SALT_ROUNDS: process.env.SALT_ROUNDS ?? 10,

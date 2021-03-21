@@ -19,12 +19,23 @@ export interface RawBookDataInterface {
   items: RawItemDataInterface[]
 }
 
-async function fetchBooks<T> (): Promise<T> {
-  const url = `https://www.googleapis.com/books/v1/users/${C.BOOKS_UID}/bookshelves/1001/volumes?key=${C.BOOKS_API_KEY}`
+async function fetchBooksByCategory (category: string): Promise<RawItemDataInterface[]> {
+  const maxResults = 40
+  const url = `https://www.googleapis.com/books/v1/users/${C.BOOKS_UID}/bookshelves/${category}/volumes?maxResults=${maxResults}&key=${C.BOOKS_API_KEY}`
 
-  const response = await fetch(url)
+  const inner = async (startIndex: number): Promise<RawItemDataInterface[]> => {
+    const response = await fetch(`${url}&startIndex=${startIndex}`)
 
-  return await response.json()
+    const { items }: RawBookDataInterface = await response.json()
+
+    if (items.length >= maxResults) {
+      return [...items, ...(await inner(startIndex + maxResults))]
+    }
+
+    return items
+  }
+
+  return await inner(0)
 }
 
-export default fetchBooks
+export default fetchBooksByCategory

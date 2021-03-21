@@ -1,3 +1,5 @@
+import googleBooks from './googleBooks'
+
 export default {
   MIN_NAME_CHARS: 2,
   MAX_NAME_CHARS: 30,
@@ -25,5 +27,5 @@ export default {
   MIN_QUERYARTICLE_LIMIT: 0,
   MAX_QUERYARTICLE_LIMIT: 1000,
 
-  AVAILABLE_CATEGORIES: ['russian', 'classics']
+  AVAILABLE_CATEGORIES: Object.values(googleBooks.data)
 }

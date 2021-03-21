@@ -1,6 +1,7 @@
 import { Response, Request } from 'express'
 import { validationResult } from 'express-validator'
-import fetchBooks, { RawBookDataInterface } from '../core/fetch'
+import googleBooks from '../config/googleBooks'
+import fetchBooksByCategory from '../core/fetch'
 import { isArrayOfStrings } from '../middlewares/withFilter'
 import BookModel, { ExtendedBookInterface } from '../models/BookModel'
 import { ErrorStatus, ServerErrorResponse, ServerSuccessResponse } from './types'
@@ -105,25 +106,33 @@ class BookController {
 
   async populate (_: Request, res: Response): Promise<void> {
     try {
-      const data: RawBookDataInterface = await fetchBooks()
+      const ids = googleBooks.ids
+      const resMessage = []
 
-      const parsedData: ExtendedBookInterface[] = data.items.map((book) => ({
-        id: book.id,
-        authors: book.volumeInfo.authors,
-        title: book.volumeInfo.title,
-        description: book.volumeInfo.description,
-        imageLinks: {
-          small: book.volumeInfo.imageLinks.smallThumbnail,
-          normal: book.volumeInfo.imageLinks.thumbnail
-        },
-        link: book.volumeInfo.previewLink
-      }))
+      for (const id of ids) {
+        const data = await fetchBooksByCategory(id)
 
-      const books = await BookModel.insertMany(parsedData, { ordered: false })
+        const parsedData: ExtendedBookInterface[] = data.map((book) => ({
+          id: book.id,
+          authors: book.volumeInfo.authors,
+          title: book.volumeInfo.title,
+          description: book.volumeInfo.description,
+          category: googleBooks.data[id],
+          imageLinks: {
+            small: book.volumeInfo.imageLinks.smallThumbnail,
+            normal: book.volumeInfo.imageLinks.thumbnail
+          },
+          link: book.volumeInfo.previewLink
+        }))
 
-      const response: ServerSuccessResponse<typeof books> = {
+        const books = await BookModel.insertMany(parsedData, { ordered: false })
+
+        resMessage.push(books)
+      }
+
+      const response: ServerSuccessResponse<typeof resMessage> = {
         status: 'success',
-        message: books
+        message: resMessage
       }
 
       res.status(200).json(response)

@@ -13,7 +13,7 @@ export const userDataValidator = [
     .isAlpha('en-US').withMessage('Surname can contain only english language symbols')
     .isLength({ min: 2, max: 30 }).withMessage('Surname is too long or too short. Minimum 2, Maximum 30'),
   body('username', 'Pick a username').isString().withMessage('Username should be a string')
-    .isLength({ min: 2, max: 30 }).withMessage('Username is too long or too short. Minimum 2, Maximum 30')
+    .isLength({ min: 2, max: 40 }).withMessage('Username is too long or too short. Minimum 2, Maximum 30')
 ]
 
 export const userRegDataValidator = [
@@ -28,7 +28,7 @@ export const articleCreateValidator = [
   body('bookId', 'Book id').isString().withMessage('Invalid book id')
     .isLength({ min: 2, max: 40 }).withMessage('Book id is too long or too short. Minimum 2, Maximum 40'),
   body('article', 'Text content of the article').isString().withMessage('Invalid symbols')
-    .isLength({ min: 30, max: 500 }).withMessage('Article is too long or too short. Minimum 30, Maximum 500'),
+    .isLength({ min: 30, max: 2000 }).withMessage('Article is too long or too short. Minimum 30, Maximum 2000'),
   body('rating', 'Rate this book').isNumeric().withMessage('Not a rating')
     .isFloat({ min: 0, max: 10 }).withMessage('Out of rating range. Rating range is between 0 and 10'),
   body('createdAt', 'Date of article creation').optional().isAscii().withMessage('Not a date')

@@ -71,7 +71,7 @@ class UserController {
         throw new Error('User exists')
       }
 
-      const salt = await bcrypt.genSalt(10)
+      const salt = await bcrypt.genSalt(+C.SALT_ROUNDS)
       const hashed = await bcrypt.hash(requestData.password, salt)
 
       const userData: UserInterface = {

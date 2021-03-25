@@ -1,4 +1,5 @@
 .env
+.debug-info.json
 /node_modules
 /dist
 /assets
